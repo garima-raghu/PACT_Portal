@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PACT Portal — CR Dashboard</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'Segoe UI',sans-serif;background:#0D1F3C;color:#fff;min-height:100vh;}
+.topbar{background:#0A1A32;border-bottom:2px solid #00C4B4;padding:0 20px;height:52px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;}
+.logo{font-size:14px;font-weight:700;letter-spacing:2px;color:#fff;}
+.logo span{color:#00C4B4;}
+.logo-sub{font-size:10px;color:rgba(255,255,255,0.4);margin-left:8px;}
+.hright{display:flex;align-items:center;gap:12px;flex-wrap:wrap;}
+.hbadge{font-size:10px;background:rgba(0,196,180,0.12);border:1px solid rgba(0,196,180,0.25);color:#00C4B4;padding:3px 10px;border-radius:10px;}
+.nav{background:#0D1F3C;border-bottom:1px solid rgba(255,255,255,0.07);display:flex;padding:0 20px;overflow-x:auto;}
+.nb{padding:11px 16px;font-size:11.5px;color:rgba(255,255,255,0.45);cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap;background:none;border-top:none;border-left:none;border-right:none;font-family:inherit;transition:all .2s;}
+.nb:hover{color:rgba(255,255,255,0.8);}
+.nb.active{color:#00C4B4;border-bottom-color:#00C4B4;font-weight:500;}
+.page{display:none;padding:18px 20px;min-height:calc(100vh - 92px);}
+.page.active{display:block;}
+.ph{margin-bottom:16px;}
+.ph h1{font-size:18px;font-weight:600;color:#fff;}
+.ph p{font-size:11px;color:rgba(255,255,255,0.4);margin-top:3px;}
+.krow{display:grid;gap:10px;margin-bottom:14px;}
+.k5{grid-template-columns:repeat(5,1fr);}
+.k4{grid-template-columns:repeat(4,1fr);}
+.k3{grid-template-columns:repeat(3,1fr);}
+.kc{background:#16325A;border-radius:8px;padding:12px 14px;border-left:3px solid #00C4B4;}
+.kc.a{border-left-color:#F5A623;}.kc.g{border-left-color:#2ECC8A;}.kc.r{border-left-color:#E63946;}.kc.p{border-left-color:#9B59B6;}
+.kl{font-size:9px;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:.6px;margin-bottom:5px;}
+.kv{font-size:24px;font-weight:700;color:#fff;line-height:1;}
+.ks{font-size:10px;color:#00C4B4;margin-top:5px;}
+.ks.a{color:#F5A623;}.ks.g{color:#2ECC8A;}
+.g2{display:grid;grid-template-columns:1.6fr 1fr;gap:12px;margin-bottom:12px;}
+.g2e{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;}
+.card{background:#16325A;border-radius:8px;overflow:hidden;margin-bottom:12px;}
+.ch{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;border-bottom:1px solid rgba(255,255,255,0.06);background:rgba(0,196,180,0.05);}
+.ct{font-size:12px;font-weight:500;color:#fff;}
+.cbadge{font-size:9.5px;background:rgba(0,196,180,0.12);border:1px solid rgba(0,196,180,0.2);color:#00C4B4;padding:2px 7px;border-radius:8px;}
+.cb{padding:12px 14px;}
+table{width:100%;border-collapse:collapse;}
+th{font-size:9.5px;color:rgba(255,255,255,0.35);text-align:left;padding:7px 12px;border-bottom:1px solid rgba(255,255,255,0.06);font-weight:500;text-transform:uppercase;letter-spacing:.5px;background:rgba(0,0,0,0.15);}
+td{font-size:11px;color:rgba(255,255,255,0.8);padding:8px 12px;border-bottom:1px solid rgba(255,255,255,0.04);}
+tr:last-child td{border-bottom:none;}
+tr:hover td{background:rgba(255,255,255,0.03);}
+.badge{display:inline-flex;align-items:center;font-size:9.5px;padding:2px 7px;border-radius:8px;font-weight:500;white-space:nowrap;}
+.bt{background:rgba(0,196,180,0.12);color:#00C4B4;border:1px solid rgba(0,196,180,0.25);}
+.ba{background:rgba(245,166,35,0.12);color:#F5A623;border:1px solid rgba(245,166,35,0.25);}
+.bg{background:rgba(46,204,138,0.12);color:#2ECC8A;border:1px solid rgba(46,204,138,0.25);}
+.bn{background:rgba(255,255,255,0.05);color:rgba(255,255,255,0.45);border:1px solid rgba(255,255,255,0.1);}
+.bp{background:rgba(155,89,182,0.12);color:#9B59B6;border:1px solid rgba(155,89,182,0.25);}
+.crnm{color:#00C4B4;font-weight:600;}
+.sr{display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid rgba(255,255,255,0.04);}
+.sr:last-child{border-bottom:none;}
+.sl{font-size:11px;color:rgba(255,255,255,0.45);}
+.sv{font-size:12px;font-weight:500;color:#fff;}
+.sv.t{color:#00C4B4;}.sv.g{color:#2ECC8A;}.sv.a{color:#F5A623;}
+.chart-wrap{padding:12px 14px;position:relative;}
+.pbar-bg{height:6px;background:rgba(255,255,255,0.07);border-radius:3px;overflow:hidden;margin-top:4px;}
+.pbar{height:100%;border-radius:3px;}
+.apr-item{display:flex;align-items:center;gap:10px;padding:9px 14px;border-bottom:1px solid rgba(255,255,255,0.04);}
+.apr-item:last-child{border-bottom:none;}
+.av{width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:600;flex-shrink:0;background:rgba(0,196,180,0.12);color:#00C4B4;}
+.note{font-size:10.5px;color:rgba(255,255,255,0.4);background:rgba(0,196,180,0.06);border-left:2px solid #00C4B4;padding:6px 10px;border-radius:0 5px 5px 0;margin:8px 14px;}
+.cost-total{display:grid;border-top:1px solid rgba(255,255,255,0.06);}
+.cost-cell{padding:12px 14px;text-align:center;border-right:1px solid rgba(255,255,255,0.06);}
+.cost-cell:last-child{border-right:none;}
+.cost-lbl{font-size:9px;color:rgba(255,255,255,0.35);text-transform:uppercase;letter-spacing:.5px;margin-bottom:5px;}
+.cost-val{font-size:18px;font-weight:700;}
+.filter-strip{display:flex;gap:6px;padding:8px 14px;border-bottom:1px solid rgba(255,255,255,0.06);flex-wrap:wrap;}
+.filter-btn{font-size:10px;padding:3px 10px;border-radius:10px;border:1px solid rgba(255,255,255,0.12);background:transparent;color:rgba(255,255,255,0.45);cursor:pointer;font-family:inherit;}
+.filter-btn.active{background:rgba(0,196,180,0.12);border-color:rgba(0,196,180,0.3);color:#00C4B4;}
+.gantt-wrap{overflow-x:auto;padding:12px 14px;}
+.gantt-grid{display:grid;grid-template-columns:160px 1fr;min-width:500px;}
+.gantt-hdr{font-size:9px;color:rgba(255,255,255,0.3);padding:4px 6px;border-bottom:1px solid rgba(255,255,255,0.06);text-align:center;}
+.gantt-label{font-size:10px;color:rgba(255,255,255,0.6);padding:3px 8px;border-bottom:1px solid rgba(255,255,255,0.03);display:flex;align-items:center;gap:5px;}
+.gantt-row{display:grid;grid-template-columns:repeat(12,1fr);border-bottom:1px solid rgba(255,255,255,0.03);padding:2px 0;}
+.gantt-cell{padding:2px;}
+.gantt-bar{height:14px;border-radius:2px;}
+.legend{display:flex;gap:12px;padding:10px 14px;flex-wrap:wrap;}
+.leg-item{display:flex;align-items:center;gap:5px;font-size:10px;color:rgba(255,255,255,0.5);}
+.leg-dot{width:12px;height:8px;border-radius:2px;}
+@media(max-width:700px){.k5{grid-template-columns:1fr 1fr;}.g2{grid-template-columns:1fr;}.g2e{grid-template-columns:1fr;}}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div style="display:flex;align-items:center;gap:10px;">
+    <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
+      <polygon points="14,2 24,8 24,20 14,26 4,20 4,8" fill="none" stroke="#00C4B4" stroke-width="1.5"/>
+      <polygon points="14,7 20,10.5 20,17.5 14,21 8,17.5 8,10.5" fill="#00C4B4" opacity="0.15"/>
+    </svg>
+    <span class="logo">PACT<span>PORTAL</span></span>
+    <span class="logo-sub">Change Request Dashboard</span>
+  </div>
+  <div class="hright">
+    <span class="hbadge">GlobalChem GmbH</span>
+    <span class="hbadge">MSP GmbH</span>
+    <span class="hbadge" style="color:rgba(255,255,255,0.4);border-color:rgba(255,255,255,0.1);background:transparent;">Framework Agreement 2024 · Aug 2026</span>
+  </div>
+</div>
+
+<div class="nav">
+  <button class="nb active" onclick="showPage('p1',this)">📊 Executive Overview</button>
+  <button class="nb" onclick="showPage('p2',this)">📋 CR Register</button>
+  <button class="nb" onclick="showPage('p3',this)">💰 Commercial &amp; Costing</button>
+  <button class="nb" onclick="showPage('p4',this)">🔄 Recurring Services</button>
+  <button class="nb" onclick="showPage('p5',this)">✅ Approvals</button>
+  <button class="nb" onclick="showPage('p6',this)">📅 Delivery Timeline</button>
+</div>
+
+<!-- PAGE 1 -->
+<div class="page active" id="p1">
+  <div class="ph"><h1>Executive Overview</h1><p>GlobalChem GmbH · MSP GmbH · Framework Agreement for Outsourcing Services · All CRs 2025–2026</p></div>
+  <div class="krow k5">
+    <div class="kc"><div class="kl">Total CRs</div><div class="kv">43</div><div class="ks">All agreements</div></div>
+    <div class="kc a"><div class="kl">Total contract value</div><div class="kv">€1.95M+</div><div class="ks a">Billable CRs</div></div>
+    <div class="kc g"><div class="kl">Completed / Closed</div><div class="kv">22</div><div class="ks g">Fully delivered</div></div>
+    <div class="kc"><div class="kl">In progress</div><div class="kv">8</div><div class="ks">Active delivery</div></div>
+    <div class="kc p"><div class="kl">Pending approval</div><div class="kv">7</div><div class="ks a">Awaiting sign-off</div></div>
+  </div>
+  <div class="g2">
+    <div>
+      <div class="card">
+        <div class="ch"><span class="ct">Change Request Register — Key CRs</span><span class="cbadge">43 CRs · 2025–2026</span></div>
+        <table>
+          <thead><tr><th>CR No.</th><th>Title</th><th>Initiative</th><th>Status</th><th>Comm</th><th>Value (€)</th><th>Start</th></tr></thead>
+          <tbody>
+            <tr><td class="crnm">001/2025</td><td>SuccessFactors AMS &amp; SOW3 Amendment</td><td>AMS SF</td><td><span class="badge bt">Implementing</span></td><td><span class="badge bt">Recurring</span></td><td style="color:#F5A623;font-weight:600">711,717</td><td style="color:rgba(255,255,255,0.4)">Mar 2025</td></tr>
+            <tr><td class="crnm">005</td><td>BW SAC Migration</td><td>Analytics</td><td><span class="badge ba">Under review</span></td><td><span class="badge ba">Billable</span></td><td>80,480</td><td style="color:rgba(255,255,255,0.4)">Sep 2025</td></tr>
+            <tr><td class="crnm">006</td><td>SAP Improvements — Post FF Integration</td><td>SAP AMS</td><td><span class="badge ba">Under review</span></td><td><span class="badge ba">Billable</span></td><td>92,480</td><td style="color:rgba(255,255,255,0.4)">2025</td></tr>
+            <tr><td class="crnm">007</td><td>SAP Additional Functionalities</td><td>SAP AMS</td><td><span class="badge bg">Closed</span></td><td><span class="badge bg">Fully billed</span></td><td>89,823</td><td style="color:rgba(255,255,255,0.4)">Sep 2025</td></tr>
+            <tr><td class="crnm">008</td><td>Neeyamo Integration — Global Payroll</td><td>HR SF Phase 2</td><td><span class="badge bg">Closed</span></td><td><span class="badge bg">Fully billed</span></td><td>35,730</td><td style="color:rgba(255,255,255,0.4)">Sep 2025</td></tr>
+            <tr><td class="crnm">021</td><td>Germany E-Invoicing Implementation</td><td>E-Invoicing</td><td><span class="badge bg">Closed</span></td><td><span class="badge bg">Fully billed</span></td><td>34,601</td><td style="color:rgba(255,255,255,0.4)">Jul 2026</td></tr>
+            <tr><td class="crnm">035</td><td>License Management &amp; Azure Cloud Optimization</td><td>License Mgmt</td><td><span class="badge bg">Closed</span></td><td><span class="badge bt">Recurring</span></td><td>0</td><td style="color:rgba(255,255,255,0.4)">May 2026</td></tr>
+            <tr><td class="crnm">036</td><td>Terminate &amp; Re-assign Roles (Yearly Review)</td><td>SAP Security</td><td><span class="badge bt">Implementing</span></td><td><span class="badge ba">Billable</span></td><td>7,219</td><td style="color:rgba(255,255,255,0.4)">May 2026</td></tr>
+            <tr><td class="crnm">042</td><td>MDI &amp; AADIP Identity Security Managed Service</td><td>Identity Security</td><td><span class="badge bg">Closed</span></td><td><span class="badge bt">Recurring</span></td><td>76,334</td><td style="color:rgba(255,255,255,0.4)">Aug 2026</td></tr>
+            <tr><td class="crnm">043</td><td>SAP S/4HANA Upgrade — Strategic Logistics</td><td>Logistics</td><td><span class="badge bn">Draft</span></td><td><span class="badge ba">Billable</span></td><td style="color:#F5A623;font-weight:600">373,201</td><td style="color:rgba(255,255,255,0.4)">Aug 2026</td></tr>
+            <tr><td class="crnm">045</td><td>SAP GRC Access Control Solution</td><td>GRC</td><td><span class="badge ba">Under review</span></td><td><span class="badge ba">Billable</span></td><td style="color:#F5A623;font-weight:600">123,052</td><td style="color:rgba(255,255,255,0.4)">TBD</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div>
+      <div class="card">
+        <div class="ch"><span class="ct">Status distribution</span></div>
+        <div class="chart-wrap" style="height:200px;"><canvas id="c1"></canvas></div>
+      </div>
+      <div class="card">
+        <div class="ch"><span class="ct">Top CRs by value</span></div>
+        <div class="chart-wrap" style="height:210px;"><canvas id="c2"></canvas></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- PAGE 2 -->
+<div class="page" id="p2">
+  <div class="ph"><h1>CR Register</h1><p>All 43 change requests · Filterable · GlobalChem GmbH &amp; MSP GmbH</p></div>
+  <div class="krow k4">
+    <div class="kc g"><div class="kl">Completed / Closed</div><div class="kv">22</div><div class="ks g">Fully delivered</div></div>
+    <div class="kc a"><div class="kl">In progress</div><div class="kv">8</div><div class="ks a">Active</div></div>
+    <div class="kc"><div class="kl">Draft / Under review</div><div class="kv">9</div><div class="ks">Pending</div></div>
+    <div class="kc p"><div class="kl">Zero-cost CRs</div><div class="kv">4</div><div class="ks">No charge</div></div>
+  </div>
+  <div class="card">
+    <div class="filter-strip">
+      <button class="filter-btn active" onclick="filterCR('all',this)">All (43)</button>
+      <button class="filter-btn" onclick="filterCR('closed',this)">Closed</button>
+      <button class="filter-btn" onclick="filterCR('implementing',this)">Implementing</button>
+      <button class="filter-btn" onclick="filterCR('draft',this)">Draft / Review</button>
+      <button class="filter-btn" onclick="filterCR('billable',this)">Billable</button>
+      <button class="filter-btn" onclick="filterCR('recurring',this)">Recurring</button>
+    </div>
+    <table id="crTable">
+      <thead><tr><th>CR No.</th><th>Title</th><th>Type</th><th>Op Status</th><th>Comm</th><th>Value (€)</th><th>Period</th></tr></thead>
+      <tbody>
+        <tr data-s="implementing" data-c="recurring"><td class="crnm">001/2025</td><td>SuccessFactors AMS &amp; SOW3 Amendment</td><td>AMS</td><td><span class="badge bt">Implementing</span></td><td><span class="badge bt">Recurring</span></td><td style="color:#F5A623;font-weight:600">711,717</td><td>Mar 2025</td></tr>
+        <tr data-s="closed" data-c="fullybilled"><td class="crnm">002/2025</td><td>S4P Bonus Process Forms Enhancements</td><td>T&amp;M</td><td><span class="badge bg">Closed</span></td><td><span class="badge bg">Fully billed</span></td><td>3,943</td><td>Jun–Jul 2025</td></tr>
+        <tr data-s="implementing" data-c="billable"><td class="crnm">003/2025</td><td>Custom Banned Password — On-Prem AD</td><td>T&amp;M</td><td><span class="badge bt">Implementing</span></td><td><span class="badge ba">Billable</span></td><td>3,660</td><td>2025</td></tr>
+        <tr data-s="closed" data-c="nocharge"><td class="crnm">004/2025</td><td>New Change Request / Project Form</td><td>Process</td><td><span class="badge bg">Closed</span></td><td><span class="badge bn">No charge</span></td><td>0</td><td>Jul–Sep 2025</td></tr>
+        <tr data-s="draft" data-c="billable"><td class="crnm">005</td><td>BW SAC Migration</td><td>T&amp;M</td><td><span class="badge ba">Under review</span></td><td><span class="badge ba">Billable</span></td><td>80,480</td><td>Sep 2025</td></tr>
+        <tr data-s="draft" data-c="billable"><td class="crnm">006</td><td>SAP Improvements — Post FF Go-Live</td><td>T&amp;M</td><td><span class="badge ba">Under review</span></td><td><span class="badge ba">Billable</span></td><td>92,480</td><td>2025</td></tr>
+        <tr data-s="closed" data-c="fullybilled"><td class="crnm">007</td><td>SAP Additional Functionalities</td><td>T&amp;M</td><td><span class="badge bg">Closed</span></td><td><span class="badge bg">Fully billed</span></td><td>89,823</td><td>Sep 2025</td></tr>
+        <tr data-s="closed" data-c="fullybilled"><td class="crnm">008</td><td>Neeyamo Integration — Global Payroll</td><td>T&amp;M</td><td><span class="badge bg">Closed</span></td><td><span class="badge bg">Fully billed</span></td><td>35,730</td><td>Sep–Oct 2025</td></tr>
+        <tr data-s="draft" data-c="billable"><td class="crnm">009</td><td>Adding Scrap to PI Sheet (AMS)</td><td>T&amp;M</td><td><span class="badge ba">Under review</span></td><td><span class="badge ba">Billable</span></td><td>5,397</td><td>Sep–Oct 2025</td></tr>
+        <tr data-s="closed" data-c="fullybilled"><td class="crnm">012</td><td>SAP EHS — 3E Project Hypercare Support</td><td>T&amp;M</td><td><span class="badge bg">Closed</span></td><td><span class="badge bg">Fully billed</span></td><td>17,316</td><td>Nov 2025</td></tr>
+        <tr data-s="draft" data-c="nocharge"><td class="crnm">013</td><td>AI Capabilities — SF &amp; S/4HANA AMS</td><td>Zero-cost</td><td><span class="badge bn">Draft</span></td><td><span class="badge bn">No charge</span></td><td>0</td><td>Nov 2025</td></tr>
+        <tr data-s="draft" data-c="billable"><td class="crnm">PVCR014</td><td>Power BI — mySM Reporting Solution</td><td>New Service</td><td><span class="badge bn">Draft</span></td><td><span class="badge ba">Billable</span></td><td>50,519</td><td>Nov–Dec 2025</td></tr>
+        <tr data-s="closed" data-c="fullybilled"><td class="crnm">015</td><td>SAP EHS — New Label Template (Unity)</td><td>T&amp;M</td><td><span class="badge bg">Closed</span></td><td><span class="badge bg">Fully billed</span></td><td>4,792</td><td>Nov–Dec 2025</td></tr>
+        <tr data-s="implementing" data-c="billable"><td class="crnm">016</td><td>Additional Customer Location — China</td><td>Transition</td><td><span class="badge bt">Implementing</span></td><td><span class="badge ba">Billable</span></td><td>1,283</td><td>Aug 2025+</td></tr>
+        <tr data-s="draft" data-c="recurring"><td class="crnm">017</td><td>Field Support — Out of Business Hours</td><td>Amendment</td><td><span class="badge ba">Under review</span></td><td><span class="badge bt">Recurring</span></td><td>0</td><td>TBD</td></tr>
+        <tr data-s="closed" data-c="fullybilled"><td class="crnm">018</td><td>PMGM Template 2026</td><td>T&amp;M</td><td><span class="badge bg">Closed</span></td><td><span class="badge bg">Fully billed</span></td><td>3,470</td><td>Dec 2025</td></tr>
+        <tr data-s="draft" data-c="billable"><td class="crnm">019</td><td>Sales Operational E2E Report — New Fields</td><td>T&amp;M</td><td><span class="badge ba">Under review</span></td><td><span class="badge ba">Billable</span></td><td>7,108</td><td>Jan–Feb 2026</td></tr>
+        <tr data-s="closed" data-c="fullybilled"><td class="crnm">020</td><td>Fixed Cost Report Design</td><td>T&amp;M</td><td><span class="badge bg">Closed</span></td><td><span class="badge bg">Fully billed</span></td><td>19,246</td><td>Jan 2026</td></tr>
+        <tr data-s="draft" data-c="billable"><td class="crnm">020A</td><td>Extension of CR020 — Fixed Cost Reporting</td><td>T&amp;M</td><td><span class="badge ba">Under review</span></td><td><span class="badge ba">Billable</span></td><td>2,264</td><td>May–Jun 2026</td></tr>
+        <tr data-s="closed" data-c="fullybilled"><td class="crnm">021</td><td>Germany E-Invoicing Implementation</td><td>T&amp;M</td><td><span class="badge bg">Closed</span></td><td><span class="badge bg">Fully billed</span></td><td>34,601</td><td>Jul–Dec 2026</td></tr>
+        <tr data-s="draft" data-c="billable"><td class="crnm">022</td><td>Intercompany STO Billing — Functional Forms</td><td>T&amp;M</td><td><span class="badge ba">Under review</span></td><td><span class="badge ba">Billable</span></td><td>3,278</td><td>Feb–Mar 2026</td></tr>
+        <tr data-s="closed" data-c="fullybilled"><td class="crnm">023</td><td>SAP HU-Level Inventory Data in BW</td><td>T&amp;M</td><td><span class="badge bg">Closed</span></td><td><span class="badge bg">Fully billed</span></td><td>5,200</td><td>Feb–Mar 2026</td></tr>
+        <tr data-s="closed" data-c="nocharge"><td class="crnm">024</td><td>GenWizard T&amp;Cs &amp; AI Tools</td><td>Zero-cost</td><td><span class="badge bg">Closed</span></td><td><span class="badge bn">No charge</span></td><td>0</td><td>Feb 2026</td></tr>
+        <tr data-s="closed" data-c="fullybilled"><td class="crnm">025</td><td>SAP SF Roles &amp; Permissions Redesign</td><td>T&amp;M</td><td><span class="badge bg">Closed</span></td><td><span class="badge bg">Fully billed</span></td><td>1,198</td><td>Mar 2026</td></tr>
+        <tr data-s="closed" data-c="fullybilled"><td class="crnm">026</td><td>EDI Invoice010 — Final Blueprint Changes</td><td>T&amp;M</td><td><span class="badge bg">Closed</span></td><td><span class="badge bg">Fully billed</span></td><td>2,225</td><td>Mar 2026</td></tr>
+        <tr data-s="closed" data-c="fullybilled"><td class="crnm">027</td><td>EDI Closure Topics</td><td>T&amp;M</td><td><span class="badge bg">Closed</span></td><td><span class="badge bg">Fully billed</span></td><td>5,422</td><td>Mar–Apr 2026</td></tr>
+        <tr data-s="closed" data-c="fullybilled"><td class="crnm">028</td><td>Service PO Indicator Derivation Logic</td><td>T&amp;M</td><td><span class="badge bg">Closed</span></td><td><span class="badge bg">Fully billed</span></td><td>2,538</td><td>Mar–Apr 2026</td></tr>
+        <tr data-s="closed" data-c="fullybilled"><td class="crnm">030</td><td>RTR — Product Hierarchy for Condition Contract</td><td>T&amp;M</td><td><span class="badge bg">Closed</span></td><td><span class="badge bg">Fully billed</span></td><td>3,992</td><td>Apr–May 2026</td></tr>
+        <tr data-s="closed" data-c="fullybilled"><td class="crnm">031</td><td>Project ODW — EDI Extension AP Sanford</td><td>T&amp;M</td><td><span class="badge bg">Closed</span></td><td><span class="badge bg">Fully billed</span></td><td>4,434</td><td>Apr 2026</td></tr>
+        <tr data-s="draft" data-c="billable"><td class="crnm">032</td><td>ePMR Application — SPAC Region India</td><td>T&amp;M</td><td><span class="badge ba">Under review</span></td><td><span class="badge ba">Billable</span></td><td>2,734</td><td>Apr 2026</td></tr>
+        <tr data-s="draft" data-c="nocharge"><td class="crnm">034</td><td>Onboarding/Offboarding JML Enhancement</td><td>Process</td><td><span class="badge bn">Draft</span></td><td><span class="badge bn">No charge</span></td><td>0</td><td>May 2026</td></tr>
+        <tr data-s="closed" data-c="recurring"><td class="crnm">035</td><td>License Management &amp; Azure Cloud Optimization</td><td>Value-add</td><td><span class="badge bg">Closed</span></td><td><span class="badge bt">Recurring</span></td><td>0</td><td>May 2026 – Apr 2030</td></tr>
+        <tr data-s="implementing" data-c="billable"><td class="crnm">036</td><td>Terminate &amp; Re-assign Roles (Yearly UAR)</td><td>T&amp;M</td><td><span class="badge bt">Implementing</span></td><td><span class="badge ba">Billable</span></td><td>7,219</td><td>May–Aug 2026</td></tr>
+        <tr data-s="draft" data-c="billable"><td class="crnm">037</td><td>AI Application Platform — Azure-based</td><td>Implementation</td><td><span class="badge ba">Under review</span></td><td><span class="badge ba">Billable</span></td><td>4,500</td><td>2026</td></tr>
+        <tr data-s="closed" data-c="fullybilled"><td class="crnm">038</td><td>MOVE Material Movement Report — BW Enhancements</td><td>T&amp;M</td><td><span class="badge bg">Closed</span></td><td><span class="badge bg">Fully billed</span></td><td>6,061</td><td>May–Jun 2026</td></tr>
+        <tr data-s="closed" data-c="fullybilled"><td class="crnm">039</td><td>3PL/4PL Inventory Data — BW Interface</td><td>T&amp;M</td><td><span class="badge bg">Closed</span></td><td><span class="badge bg">Fully billed</span></td><td>8,705</td><td>Jun–Jul 2026</td></tr>
+        <tr data-s="closed" data-c="fullybilled"><td class="crnm">040</td><td>France E-Invoicing Implementation</td><td>T&amp;M</td><td><span class="badge bg">Closed</span></td><td><span class="badge bg">Fully billed</span></td><td>18,094</td><td>Jul–Sep 2026</td></tr>
+        <tr data-s="closed" data-c="fullybilled"><td class="crnm">041</td><td>Credit Check Redesign</td><td>T&amp;M</td><td><span class="badge bg">Closed</span></td><td><span class="badge bg">Fully billed</span></td><td>6,654</td><td>Jul–Aug 2026</td></tr>
+        <tr data-s="closed" data-c="recurring"><td class="crnm">042</td><td>MDI &amp; AADIP Identity Security Managed Service</td><td>Managed Service</td><td><span class="badge bg">Closed</span></td><td><span class="badge bt">Recurring</span></td><td>76,334</td><td>Aug 2026+</td></tr>
+        <tr data-s="draft" data-c="billable"><td class="crnm">043</td><td>SAP S/4HANA Upgrade — Strategic Logistics</td><td>T&amp;M</td><td><span class="badge bn">Draft</span></td><td><span class="badge ba">Billable</span></td><td style="color:#F5A623;font-weight:600">373,201</td><td>Aug 2026+</td></tr>
+        <tr data-s="closed" data-c="fullybilled"><td class="crnm">044</td><td>Sales E2E Report — Phase 2 Additional Fields</td><td>T&amp;M</td><td><span class="badge bg">Closed</span></td><td><span class="badge bg">Fully billed</span></td><td>2,564</td><td>Aug–Sep 2026</td></tr>
+        <tr data-s="draft" data-c="billable"><td class="crnm">045</td><td>SAP GRC Access Control Solution</td><td>T&amp;M</td><td><span class="badge ba">Under review</span></td><td><span class="badge ba">Billable</span></td><td style="color:#F5A623;font-weight:600">123,052</td><td>TBD</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- PAGE 3 -->
+<div class="page" id="p3">
+  <div class="ph"><h1>Commercial &amp; Costing</h1><p>Billable CRs · Estimate lines · Rate card · EUR · 2025–2026</p></div>
+  <div class="krow k4">
+    <div class="kc a"><div class="kl">Total billable value</div><div class="kv">€1.24M+</div><div class="ks a">One-time T&amp;M CRs</div></div>
+    <div class="kc"><div class="kl">Largest CR</div><div class="kv">€373K</div><div class="ks">CR-043 S/4HANA Upgrade</div></div>
+    <div class="kc g"><div class="kl">Avg CR value</div><div class="kv">€27.5K</div><div class="ks g">Excl. zero-cost CRs</div></div>
+    <div class="kc p"><div class="kl">Recurring ACV</div><div class="kv">€765K+</div><div class="ks">CR-001 + CR-042 annual</div></div>
+  </div>
+  <div class="g2">
+    <div>
+      <div class="card">
+        <div class="ch"><span class="ct">Cost distribution — Top 12 CRs by value</span></div>
+        <div class="chart-wrap" style="height:280px;"><canvas id="c3"></canvas></div>
+      </div>
+      <div class="card">
+        <div class="ch"><span class="ct">CR-036 Rate card — Estimate lines</span><span class="cbadge">2026 agreed rates</span></div>
+        <table>
+          <thead><tr><th>Role</th><th>Location</th><th>Rate (€/day)</th><th>Days</th><th>Amount (€)</th></tr></thead>
+          <tbody>
+            <tr><td>Senior Consultant (Basis)</td><td><span class="badge bn">Offshore</span></td><td style="color:#F5A623">€380</td><td>1.25</td><td style="font-weight:600">€475</td></tr>
+            <tr><td>Consultant (Security)</td><td><span class="badge bn">Offshore</span></td><td style="color:#F5A623">€244</td><td>10.00</td><td style="font-weight:600">€2,440</td></tr>
+            <tr><td>Senior Consultant (Security)</td><td><span class="badge bn">Offshore</span></td><td style="color:#F5A623">€380</td><td>10.00</td><td style="font-weight:600">€3,800</td></tr>
+            <tr><td>Project Manager</td><td><span class="badge bn">Offshore</span></td><td style="color:#F5A623">€504</td><td>1.00</td><td style="font-weight:600">€504</td></tr>
+          </tbody>
+        </table>
+        <div class="cost-total" style="grid-template-columns:1fr 1fr 1fr;">
+          <div class="cost-cell"><div class="cost-lbl">Gross total</div><div class="cost-val" style="color:#fff">€7,219</div></div>
+          <div class="cost-cell"><div class="cost-lbl">Cost share</div><div class="cost-val" style="color:#F5A623">50 / 50%</div></div>
+          <div class="cost-cell" style="background:rgba(0,196,180,0.06);"><div class="cost-lbl">Bill to client</div><div class="cost-val" style="color:#00C4B4">€3,609.50</div></div>
+        </div>
+      </div>
+    </div>
+    <div>
+      <div class="card">
+        <div class="ch"><span class="ct">Commercial type breakdown</span></div>
+        <div class="chart-wrap" style="height:180px;"><canvas id="c4"></canvas></div>
+      </div>
+      <div class="card">
+        <div class="ch"><span class="ct">Offshore vs Onshore split</span></div>
+        <div class="chart-wrap" style="height:160px;"><canvas id="c5"></canvas></div>
+      </div>
+      <div class="card">
+        <div class="ch"><span class="ct">Commercial summary</span></div>
+        <div class="cb">
+          <div class="sr"><span class="sl">Total one-time T&amp;M</span><span class="sv a">€1,243,000+</span></div>
+          <div class="sr"><span class="sl">Zero-cost CRs</span><span class="sv">4 CRs</span></div>
+          <div class="sr"><span class="sl">CR-001 fixed price (4yr)</span><span class="sv t">€580,163</span></div>
+          <div class="sr"><span class="sl">MDI/AADIP monthly recurring</span><span class="sv t">€2,120/mo</span></div>
+          <div class="sr"><span class="sl">Largest CR</span><span class="sv a">CR-043 · €373,201</span></div>
+          <div class="sr"><span class="sl">CR-036 cost share applied</span><span class="sv">50% · €3,609.50</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- PAGE 4 -->
+<div class="page" id="p4">
+  <div class="ph"><h1>Recurring Services</h1><p>Long-term managed services · Multi-year contract values · CRs with recurring charges</p></div>
+  <div class="krow k4">
+    <div class="kc"><div class="kl">Recurring CRs</div><div class="kv">4</div><div class="ks">001 · 035 · 042 · PVCR014</div></div>
+    <div class="kc a"><div class="kl">CR-001 annual value</div><div class="kv">€160K</div><div class="ks a">Yr1 · SF AMS</div></div>
+    <div class="kc g"><div class="kl">CR-001 4-year total</div><div class="kv">€580K</div><div class="ks g">Fixed price position</div></div>
+    <div class="kc p"><div class="kl">MDI/AADIP monthly</div><div class="kv">€2,120</div><div class="ks">Fixed · 3yr contract</div></div>
+  </div>
+  <div class="card">
+    <div class="ch"><span class="ct">CR-001 — SF AMS Fixed price schedule</span></div>
+    <table>
+      <thead><tr><th>Service</th><th>Type</th><th>Yr 1 (€)</th><th>Yr 2 (€)</th><th>Yr 3 (€)</th><th>Yr 4 (€)</th><th>Effective</th></tr></thead>
+      <tbody>
+        <tr><td style="font-weight:500">SuccessFactors AMS</td><td><span class="badge ba">Fixed Price</span></td><td style="color:#F5A623;font-weight:600">160,120</td><td>149,446</td><td>138,842</td><td>131,655</td><td style="color:rgba(255,255,255,0.4)">Mar 2025</td></tr>
+      </tbody>
+    </table>
+    <div class="cost-total" style="grid-template-columns:1fr 1fr 1fr 1fr;">
+      <div class="cost-cell"><div class="cost-lbl">Year 1</div><div class="cost-val" style="color:#F5A623;font-size:16px">€160,120</div></div>
+      <div class="cost-cell"><div class="cost-lbl">Year 2</div><div class="cost-val" style="font-size:16px">€149,446</div></div>
+      <div class="cost-cell"><div class="cost-lbl">Year 3</div><div class="cost-val" style="font-size:16px">€138,842</div></div>
+      <div class="cost-cell" style="background:rgba(0,196,180,0.06);"><div class="cost-lbl">4-Year total</div><div class="cost-val" style="color:#00C4B4;font-size:16px">€580,163</div></div>
+    </div>
+  </div>
+  <div class="g2e">
+    <div class="card">
+      <div class="ch"><span class="ct">CR-035 — License Management &amp; Cloud Optimization · Value-add services</span><span class="cbadge">May 2026 – Apr 2030</span></div>
+      <table>
+        <thead><tr><th>Service object</th><th>Type</th><th>Delivery</th><th>Annual value</th></tr></thead>
+        <tbody>
+          <tr><td style="font-weight:500">M365 License Management Suite</td><td><span class="badge bt">Service</span></td><td>Monthly</td><td style="color:rgba(255,255,255,0.4)">Per amendment</td></tr>
+          <tr><td style="font-weight:500">M365 License Optimization (AI)</td><td><span class="badge ba">Software/AI</span></td><td>Quarterly</td><td style="color:rgba(255,255,255,0.4)">Per amendment</td></tr>
+          <tr><td style="font-weight:500">SAMurAI Power BI Dashboard Suite</td><td><span class="badge bt">Service</span></td><td>Monthly</td><td style="color:rgba(255,255,255,0.4)">Per amendment</td></tr>
+          <tr><td style="font-weight:500">Azure Cloud Management &amp; Optimization</td><td><span class="badge bp">Cloud</span></td><td>Monthly</td><td style="color:rgba(255,255,255,0.4)">Per amendment</td></tr>
+          <tr><td style="font-weight:500">AURA Automation Platform</td><td><span class="badge ba">Software/AI</span></td><td>Continuous</td><td style="color:rgba(255,255,255,0.4)">Per amendment</td></tr>
+        </tbody>
+      </table>
+      <div class="note">Monthly fees confirmed per amended Attachment 1 — SOW2 IMS. All 5 services live as of 01 May 2026. AI powered by Mistral 7B/14B deployed in client infrastructure.</div>
+    </div>
+    <div>
+      <div class="card">
+        <div class="ch"><span class="ct">CR-042 — MDI &amp; AADIP Identity Security</span><span class="cbadge">Aug 2026 · 3yr</span></div>
+        <table>
+          <thead><tr><th>Service</th><th>Monthly (€)</th><th>Annual (€)</th><th>3yr total</th></tr></thead>
+          <tbody>
+            <tr><td style="font-weight:500">MDI &amp; AADIP Managed Service</td><td style="color:#F5A623;font-weight:600">2,120.40</td><td>25,444</td><td style="color:#00C4B4;font-weight:600">76,334</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="card">
+        <div class="ch"><span class="ct">PVCR014 — Power BI mySM Dashboard</span></div>
+        <table>
+          <thead><tr><th>Service</th><th>Yr 1 (€)</th><th>Yr 2 (€)</th><th>Yr 3 (€)</th><th>Yr 4 (€)</th></tr></thead>
+          <tbody>
+            <tr><td>Power BI Dashboard</td><td style="color:#F5A623">6,588</td><td>14,493</td><td>14,493</td><td>14,946</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="card">
+        <div class="ch"><span class="ct">Recurring revenue — 4yr forecast</span></div>
+        <div class="chart-wrap" style="height:180px;"><canvas id="c6"></canvas></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- PAGE 5 -->
+<div class="page" id="p5">
+  <div class="ph"><h1>Approvals &amp; Governance</h1><p>Full approval trail · DocuSign signatures · All CRs · 2025–2026</p></div>
+  <div class="krow k4">
+    <div class="kc g"><div class="kl">Total approvals recorded</div><div class="kv">133</div><div class="ks g">Across all CRs</div></div>
+    <div class="kc g"><div class="kl">DocuSign envelopes</div><div class="kv">18</div><div class="ks g">Fully signed</div></div>
+    <div class="kc a"><div class="kl">Pending approvals</div><div class="kv">24</div><div class="ks a">Awaiting sign-off</div></div>
+    <div class="kc"><div class="kl">Key signatories</div><div class="kv">8</div><div class="ks">MSP GmbH + GlobalChem</div></div>
+  </div>
+  <div class="g2e">
+    <div class="card">
+      <div class="ch"><span class="ct">Key signatories — Approval frequency</span></div>
+      <div class="cb">
+        <div style="margin-bottom:10px;"><div style="display:flex;justify-content:space-between;margin-bottom:3px;"><div><div style="font-size:11.5px;font-weight:500;color:#fff;">A. Heussler</div><div style="font-size:10px;color:rgba(255,255,255,0.4);">Generalbevollmächtigter · MSP GmbH</div></div><span style="font-size:13px;font-weight:600;color:#00C4B4;">18</span></div><div class="pbar-bg"><div class="pbar" style="width:90%;background:#00C4B4;"></div></div></div>
+        <div style="margin-bottom:10px;"><div style="display:flex;justify-content:space-between;margin-bottom:3px;"><div><div style="font-size:11.5px;font-weight:500;color:#fff;">G. Hüsken</div><div style="font-size:10px;color:rgba(255,255,255,0.4);">Geschäftsführer · MSP GmbH</div></div><span style="font-size:13px;font-weight:600;color:#00C4B4;">17</span></div><div class="pbar-bg"><div class="pbar" style="width:85%;background:#00C4B4;"></div></div></div>
+        <div style="margin-bottom:10px;"><div style="display:flex;justify-content:space-between;margin-bottom:3px;"><div><div style="font-size:11.5px;font-weight:500;color:#fff;">P. Weber</div><div style="font-size:10px;color:rgba(255,255,255,0.4);">Director SAP · GlobalChem GmbH</div></div><span style="font-size:13px;font-weight:600;color:#00C4B4;">20</span></div><div class="pbar-bg"><div class="pbar" style="width:100%;background:#00C4B4;"></div></div></div>
+        <div style="margin-bottom:10px;"><div style="display:flex;justify-content:space-between;margin-bottom:3px;"><div><div style="font-size:11.5px;font-weight:500;color:#fff;">M. Schmitt</div><div style="font-size:10px;color:rgba(255,255,255,0.4);">Category Manager Services &amp; IT · GlobalChem GmbH</div></div><span style="font-size:13px;font-weight:600;color:#00C4B4;">16</span></div><div class="pbar-bg"><div class="pbar" style="width:80%;background:#00C4B4;"></div></div></div>
+        <div style="margin-bottom:10px;"><div style="display:flex;justify-content:space-between;margin-bottom:3px;"><div><div style="font-size:11.5px;font-weight:500;color:#fff;">V. Murthy</div><div style="font-size:10px;color:rgba(255,255,255,0.4);">Service Manager · MSP GmbH</div></div><span style="font-size:13px;font-weight:600;color:#00C4B4;">4</span></div><div class="pbar-bg"><div class="pbar" style="width:20%;background:#00C4B4;"></div></div></div>
+        <div style="margin-bottom:10px;"><div style="display:flex;justify-content:space-between;margin-bottom:3px;"><div><div style="font-size:11.5px;font-weight:500;color:#fff;">N. Kalantri</div><div style="font-size:10px;color:rgba(255,255,255,0.4);">Lead · MSP GmbH</div></div><span style="font-size:13px;font-weight:600;color:#00C4B4;">3</span></div><div class="pbar-bg"><div class="pbar" style="width:15%;background:#00C4B4;"></div></div></div>
+      </div>
+    </div>
+    <div>
+      <div class="card">
+        <div class="ch"><span class="ct">Approval status distribution</span></div>
+        <div class="chart-wrap" style="height:180px;"><canvas id="c7"></canvas></div>
+      </div>
+      <div class="card">
+        <div class="ch"><span class="ct">Recent approvals — 2026</span></div>
+        <div class="apr-item"><div class="av">DC</div><div style="flex:1;"><div style="font-size:11.5px;font-weight:500;">D. Consolati</div><div style="font-size:10px;color:rgba(255,255,255,0.4);">Director Enterprise Process · CR-044</div></div><div style="text-align:right;"><span class="badge bg">✓ Approved</span><div style="font-size:9.5px;color:rgba(255,255,255,0.3);margin-top:3px;">24 Aug 2026</div></div></div>
+        <div class="apr-item"><div class="av">PW</div><div style="flex:1;"><div style="font-size:11.5px;font-weight:500;">P. Weber</div><div style="font-size:10px;color:rgba(255,255,255,0.4);">Director SAP · CR-044</div></div><div style="text-align:right;"><span class="badge bg">✓ Approved</span><div style="font-size:9.5px;color:rgba(255,255,255,0.3);margin-top:3px;">24 Aug 2026</div></div></div>
+        <div class="apr-item"><div class="av">VW</div><div style="flex:1;"><div style="font-size:11.5px;font-weight:500;">V. Wolters</div><div style="font-size:10px;color:rgba(255,255,255,0.4);">Managing Director · CR-042</div></div><div style="text-align:right;"><span class="badge bg">✓ Signed</span><div style="font-size:9.5px;color:rgba(255,255,255,0.3);margin-top:3px;">14 Aug 2026</div></div></div>
+        <div class="apr-item"><div class="av">MS</div><div style="flex:1;"><div style="font-size:11.5px;font-weight:500;">M. Schmitt</div><div style="font-size:10px;color:rgba(255,255,255,0.4);">Category Manager · CR-041</div></div><div style="text-align:right;"><span class="badge bg">✓ Approved</span><div style="font-size:9.5px;color:rgba(255,255,255,0.3);margin-top:3px;">26 Jun 2026</div></div></div>
+        <div class="apr-item"><div class="av">PW</div><div style="flex:1;"><div style="font-size:11.5px;font-weight:500;">P. Weber</div><div style="font-size:10px;color:rgba(255,255,255,0.4);">Director SAP · CR-040</div></div><div style="text-align:right;"><span class="badge bg">✓ Approved</span><div style="font-size:9.5px;color:rgba(255,255,255,0.3);margin-top:3px;">26 Jun 2026</div></div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- PAGE 6 -->
+<div class="page" id="p6">
+  <div class="ph"><h1>Delivery Timeline</h1><p>All CRs plotted by start and end date · 2025–2026</p></div>
+  <div class="krow k4">
+    <div class="kc g"><div class="kl">Delivered in 2025</div><div class="kv">12</div><div class="ks g">CRs completed</div></div>
+    <div class="kc a"><div class="kl">Delivered in 2026</div><div class="kv">18</div><div class="ks a">CRs completed</div></div>
+    <div class="kc"><div class="kl">In delivery now</div><div class="kv">5</div><div class="ks">Aug 2026</div></div>
+    <div class="kc p"><div class="kl">Planned / Draft</div><div class="kv">7</div><div class="ks">Not yet started</div></div>
+  </div>
+  <div class="card">
+    <div class="ch"><span class="ct">CR delivery timeline — 2025 to 2026</span><span class="cbadge">Gantt view</span></div>
+    <div class="gantt-wrap">
+      <div class="gantt-grid">
+        <div style="font-size:9px;color:rgba(255,255,255,0.3);padding:4px 8px;border-bottom:1px solid rgba(255,255,255,0.06);">CR</div>
+        <div style="display:grid;grid-template-columns:repeat(12,1fr);border-bottom:1px solid rgba(255,255,255,0.06);">
+          <div class="gantt-hdr">Mar25</div><div class="gantt-hdr">Jun25</div><div class="gantt-hdr">Sep25</div><div class="gantt-hdr">Dec25</div>
+          <div class="gantt-hdr">Jan26</div><div class="gantt-hdr">Mar26</div><div class="gantt-hdr">May26</div><div class="gantt-hdr">Jun26</div>
+          <div class="gantt-hdr">Jul26</div><div class="gantt-hdr">Aug26</div><div class="gantt-hdr">Sep26</div><div class="gantt-hdr">Dec26</div>
+        </div>
+      </div>
+      <div id="ganttBody" class="gantt-grid"></div>
+    </div>
+    <div class="legend">
+      <div class="leg-item"><div class="leg-dot" style="background:#2ECC8A;"></div>Completed</div>
+      <div class="leg-item"><div class="leg-dot" style="background:#00C4B4;"></div>Implementing / Recurring</div>
+      <div class="leg-item"><div class="leg-dot" style="background:#F5A623;"></div>In progress</div>
+      <div class="leg-item"><div class="leg-dot" style="background:#E63946;"></div>Large / Draft</div>
+      <div class="leg-item"><div class="leg-dot" style="background:#9B59B6;"></div>Managed service</div>
+    </div>
+  </div>
+</div>
+
+<script>
+function showPage(id, btn) {
+  document.querySelectorAll('.page').forEach(function(p){ p.classList.remove('active'); });
+  document.querySelectorAll('.nb').forEach(function(b){ b.classList.remove('active'); });
+  var el = document.getElementById(id);
+  if(el) el.classList.add('active');
+  if(btn) btn.classList.add('active');
+}
+
+function filterCR(type, btn) {
+  document.querySelectorAll('.filter-btn').forEach(function(b){ b.classList.remove('active'); });
+  if(btn) btn.classList.add('active');
+  document.querySelectorAll('#crTable tbody tr').forEach(function(row){
+    if(type === 'all'){ row.style.display = ''; return; }
+    var s = row.dataset.s || '';
+    var c = row.dataset.c || '';
+    var show = false;
+    if(type === 'closed' && s === 'closed') show = true;
+    else if(type === 'implementing' && s === 'implementing') show = true;
+    else if(type === 'draft' && s === 'draft') show = true;
+    else if(type === 'billable' && c === 'billable') show = true;
+    else if(type === 'recurring' && c === 'recurring') show = true;
+    row.style.display = show ? '' : 'none';
+  });
+}
+
+// Build Gantt
+var ganttData = [
+  {cr:'001/2025',title:'SF AMS',s:0,e:11,color:'#00C4B4'},
+  {cr:'002/2025',title:'Bonus Forms',s:1,e:3,color:'#2ECC8A'},
+  {cr:'003/2025',title:'Banned Password',s:2,e:5,color:'#F5A623'},
+  {cr:'005',title:'BW SAC Migration',s:2,e:3,color:'#2ECC8A'},
+  {cr:'007',title:'SAP Functionalities',s:2,e:4,color:'#2ECC8A'},
+  {cr:'008',title:'Neeyamo Integration',s:2,e:3,color:'#2ECC8A'},
+  {cr:'012',title:'EHS 3E Hypercare',s:3,e:3,color:'#2ECC8A'},
+  {cr:'018',title:'PMGM Template 2026',s:3,e:4,color:'#2ECC8A'},
+  {cr:'020',title:'Fixed Cost Report',s:4,e:4,color:'#2ECC8A'},
+  {cr:'023',title:'HU Inventory BW',s:4,e:5,color:'#2ECC8A'},
+  {cr:'025',title:'SF Roles Redesign',s:5,e:5,color:'#2ECC8A'},
+  {cr:'026-027',title:'EDI Closure/Invoice',s:5,e:6,color:'#2ECC8A'},
+  {cr:'030-031',title:'RTR / ODW EDI',s:6,e:6,color:'#2ECC8A'},
+  {cr:'035',title:'License Mgmt (4yr)',s:6,e:11,color:'#00C4B4'},
+  {cr:'036',title:'Terminate Roles',s:6,e:8,color:'#F5A623'},
+  {cr:'038-039',title:'BW Reports',s:7,e:8,color:'#2ECC8A'},
+  {cr:'040-041',title:'E-Inv France + Credit',s:8,e:10,color:'#2ECC8A'},
+  {cr:'042',title:'MDI/AADIP (3yr)',s:9,e:11,color:'#9B59B6'},
+  {cr:'043',title:'S/4HANA Upgrade',s:9,e:11,color:'#E63946'},
+  {cr:'044',title:'Sales E2E Phase 2',s:9,e:10,color:'#2ECC8A'},
+  {cr:'045',title:'SAP GRC',s:9,e:11,color:'#F5A623'}
+];
+
+var gb = document.getElementById('ganttBody');
+if(gb) {
+  ganttData.forEach(function(r){
+    var labelDiv = document.createElement('div');
+    labelDiv.className = 'gantt-label';
+    labelDiv.innerHTML = '<span style="color:#00C4B4;font-weight:600;margin-right:4px;">'+r.cr+'</span>'+r.title;
+
+    var rowDiv = document.createElement('div');
+    rowDiv.className = 'gantt-row';
+    for(var i=0;i<12;i++){
+      var cell = document.createElement('div');
+      cell.className = 'gantt-cell';
+      if(i >= r.s && i <= r.e){
+        var bar = document.createElement('div');
+        bar.className = 'gantt-bar';
+        bar.style.background = r.color;
+        bar.style.opacity = (i===r.s||i===r.e) ? '1' : '0.7';
+        cell.appendChild(bar);
+      }
+      rowDiv.appendChild(cell);
+    }
+    gb.appendChild(labelDiv);
+    gb.appendChild(rowDiv);
+  });
+}
+
+// Charts
+var tc = 'rgba(255,255,255,0.35)';
+var gc = 'rgba(255,255,255,0.06)';
+Chart.defaults.color = tc;
+Chart.defaults.borderColor = gc;
+
+function mkChart(id, type, data, opts) {
+  var el = document.getElementById(id);
+  if(!el) return;
+  try { new Chart(el, {type:type, data:data, options:opts||{}}); }
+  catch(e){ console.log('Chart error',id,e); }
+}
+
+mkChart('c1','doughnut',{
+  labels:['Closed/Completed','Implementing','Under Review/Draft','No file'],
+  datasets:[{data:[22,5,10,3],backgroundColor:['#2ECC8A','#00C4B4','#F5A623','rgba(255,255,255,0.15)'],borderWidth:0}]
+},{responsive:true,maintainAspectRatio:false,cutout:'65%',plugins:{legend:{position:'bottom',labels:{color:tc,font:{size:10},boxWidth:10,padding:8}}}});
+
+mkChart('c2','bar',{
+  labels:['043','001','045','006','005','007','042','021','008','PVCR014','020','036'],
+  datasets:[{data:[373201,160120,123052,92480,80480,89823,76334,34601,35730,50519,19246,7219],backgroundColor:['#E63946','#00C4B4','#F5A623','#F5A623','#F5A623','#2ECC8A','#9B59B6','#2ECC8A','#2ECC8A','#F5A623','#2ECC8A','#00C4B4'],borderRadius:3}]
+},{responsive:true,maintainAspectRatio:false,indexAxis:'y',plugins:{legend:{display:false}},scales:{x:{ticks:{color:tc,font:{size:9},callback:function(v){return '€'+(v/1000).toFixed(0)+'K';}},grid:{color:gc}},y:{ticks:{color:tc,font:{size:9}},grid:{display:false}}}});
+
+mkChart('c3','bar',{
+  labels:['043','001','045','006','005','007','042','021','008','PVCR014','020','039'],
+  datasets:[{label:'Value (€)',data:[373201,160120,123052,92480,80480,89823,76334,34601,35730,50519,19246,8705],backgroundColor:'#00C4B4',borderRadius:3}]
+},{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{color:tc,font:{size:9}},grid:{display:false}},y:{ticks:{color:tc,font:{size:9},callback:function(v){return '€'+(v/1000).toFixed(0)+'K';}},grid:{color:gc}}}});
+
+mkChart('c4','doughnut',{
+  labels:['T&M Billable','Recurring/Fixed','Zero-cost'],
+  datasets:[{data:[40,4,4],backgroundColor:['#00C4B4','#F5A623','#16325A'],borderWidth:0}]
+},{responsive:true,maintainAspectRatio:false,cutout:'60%',plugins:{legend:{position:'bottom',labels:{color:tc,font:{size:10},boxWidth:10,padding:8}}}});
+
+mkChart('c5','doughnut',{
+  labels:['Offshore','Onshore','Nearshore'],
+  datasets:[{data:[75,20,5],backgroundColor:['#00C4B4','#F5A623','#2ECC8A'],borderWidth:0}]
+},{responsive:true,maintainAspectRatio:false,cutout:'60%',plugins:{legend:{position:'bottom',labels:{color:tc,font:{size:10},boxWidth:10,padding:8}}}});
+
+mkChart('c6','bar',{
+  labels:['2025','2026','2027','2028','2029'],
+  datasets:[
+    {label:'SF AMS (CR-001)',data:[120000,160120,149446,138842,131655],backgroundColor:'#00C4B4',borderRadius:3},
+    {label:'MDI/AADIP (CR-042)',data:[0,8482,25445,25445,17000],backgroundColor:'#9B59B6',borderRadius:3},
+    {label:'PBI mySM',data:[0,6588,14493,14493,14946],backgroundColor:'#F5A623',borderRadius:3}
+  ]
+},{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:tc,font:{size:9},boxWidth:10}}},scales:{x:{stacked:true,ticks:{color:tc,font:{size:9}},grid:{display:false}},y:{stacked:true,ticks:{color:tc,font:{size:9},callback:function(v){return '€'+(v/1000).toFixed(0)+'K';}},grid:{color:gc}}}});
+
+mkChart('c7','doughnut',{
+  labels:['Approved/Signed','Pending'],
+  datasets:[{data:[109,24],backgroundColor:['#2ECC8A','#F5A623'],borderWidth:0}]
+},{responsive:true,maintainAspectRatio:false,cutout:'65%',plugins:{legend:{position:'bottom',labels:{color:tc,font:{size:10},boxWidth:10,padding:8}}}});
+</script>
+</body>
+</html>
