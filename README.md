@@ -1,4 +1,4 @@
-# PACT Portal — Polyvantis Agreement & Commercial Tracker
+# PACT Portal — Agreement & Commercial Tracker
 
 A full-stack enterprise portal for managing Change Requests, commercial costing, approval workflows, and recurring service tracking between a client and a managed services provider.
 
