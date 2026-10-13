@@ -1,14 +1,20 @@
 # PACT Portal — Agreement & Commercial Tracker
 
-A full-stack enterprise portal for managing Change Requests, commercial costing, approval workflows, and recurring service tracking between a client and a managed services provider.
+A full-stack enterprise portal for managing Change Requests, commercial costing, approval workflows, and recurring service tracking between an enterprise client and a managed services provider.
 
-> Built as an internal delivery tool. All data in this repository is anonymized demo data.
+> Built as an internal delivery tool for a global specialty chemicals manufacturer under a multi-year outsourcing engagement. All data in this repository is anonymized demo data.
+
+![Next.js](https://img.shields.io/badge/Next.js-16-black?style=flat&logo=next.js)
+![ASP.NET Core](https://img.shields.io/badge/ASP.NET_Core-8-purple?style=flat&logo=dotnet)
+![SQL Server](https://img.shields.io/badge/SQL_Server-Express-red?style=flat&logo=microsoft-sql-server)
+![TypeScript](https://img.shields.io/badge/TypeScript-5-blue?style=flat&logo=typescript)
+![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-3-teal?style=flat&logo=tailwind-css)
 
 ---
 
 ## 🖥️ Live Demo
 
-> Open `dashboard/PACT_Dashboard.html` in any browser — no server required.
+Open `dashboard/PACT_Dashboard.html` in any browser — no server required. 6 interactive pages with demo data.
 
 ---
 
@@ -29,14 +35,14 @@ A full-stack enterprise portal for managing Change Requests, commercial costing,
 ## 📁 Project Structure
 
 ```
-PACT_Portal/
+pact-portal/
 ├── web/                        # Next.js frontend
 │   ├── app/
 │   │   ├── dashboard/          # Executive dashboard
 │   │   ├── cr/                 # CR list + detail pages
 │   │   ├── commercial/         # Commercial costing (5 tabs)
 │   │   ├── approval/           # Approval workflow
-│   │   ├── documents/          # SharePoint document viewer
+│   │   ├── documents/          # Document viewer panel
 │   │   ├── import/             # AI PDF import (Mistral 7B)
 │   │   ├── reports/            # Charts and financial summary
 │   │   ├── audit/              # Immutable audit log
@@ -64,6 +70,7 @@ PACT_Portal/
 - Part A (request details), Part B (proposal & scope), Part C (signatures)
 - Rate card with estimate lines per CR
 - Key deliverables and risk tracking
+- RITM reference tracking
 
 ### Commercial & Costing
 - Gross estimate, bill to client, cost share %
@@ -77,15 +84,15 @@ PACT_Portal/
 - Annual recurring value calculation
 
 ### Approval Workflow
-- Multi-step approval chain (Accenture internal + Customer)
+- Multi-step approval chain (internal + customer)
 - DocuSign envelope tracking
 - Full audit trail — append-only, immutable
 
 ### AI PDF Import (Mistral 7B)
 - Upload existing CR PDFs
-- Mistral 7B extracts all fields automatically
+- Mistral 7B extracts all fields automatically (runs locally)
 - Review and confirm before saving to database
-- Runs locally — no data leaves the network
+- No data leaves the network
 
 ### Power BI Dashboard (6 pages)
 - Executive Overview — KPIs, CR register, status charts
@@ -107,14 +114,12 @@ PACT_Portal/
 
 ### 1. Clone the repo
 ```bash
-git clone https://github.com/garima-raghu/PACT_Portal.git
-cd PACT_Portal
+git clone https://github.com/garima-raghu/pact-portal.git
+cd pact-portal
 ```
 
 ### 2. Database setup
 ```bash
-# Create CRTracker database in SQL Server
-# Run migrations
 cd api
 dotnet ef database update
 ```
@@ -128,7 +133,7 @@ sqlcmd -S .\SQLEXPRESS -d CRTracker -I -i database/seeds/demo_seed.sql
 ```bash
 cd api
 dotnet run
-# API available at http://localhost:5000
+# API at http://localhost:5000
 # Swagger at http://localhost:5000/swagger
 ```
 
@@ -140,28 +145,28 @@ npm run dev
 # Portal at http://localhost:3000
 ```
 
-### 6. Or run both with pm2
+### 6. Production (pm2)
 ```bash
-pm2 start ecosystem.config.js
+# API
+pm2 start api-published/PACTPortal.Api.exe --name PACTPortalApi
+
+# Frontend
+pm2 start web/pm2.config.json
 ```
 
 ---
 
 ## 📊 Standalone Dashboard
 
-No setup needed — just open in browser:
-
+No setup needed:
 ```
 dashboard/PACT_Dashboard.html
 ```
-
-6 interactive pages with demo data. Works offline.
+Open in any browser. 6 interactive pages, works fully offline.
 
 ---
 
 ## 🗄️ Database Schema
-
-Key tables in `CRTracker`:
 
 | Table | Description |
 |---|---|
@@ -174,19 +179,8 @@ Key tables in `CRTracker`:
 | `cr_status_histories` | Immutable status change log |
 | `cr_documents` | DocuSign envelope tracking |
 | `audit_logs` | Append-only audit trail |
-| `users` | Accenture + customer users |
+| `users` | Internal and customer users |
 | `rate_cards` | Agreed day rates by role and location |
-
----
-
-## 🔐 Authentication
-
-Microsoft Entra ID (MSAL) integration is built but currently disabled for demo purposes. To enable:
-
-```typescript
-// web/app/layout.tsx — wrap with MsalProvider
-// web/lib/msal.ts — configure clientId and tenantId
-```
 
 ---
 
@@ -201,7 +195,7 @@ POST   /api/v1/Cr/{id}/approve — Record approval
 GET    /api/v1/Cr/dashboard    — Dashboard aggregates
 ```
 
-Swagger UI: `http://localhost:5000/swagger`
+Swagger UI available at `/swagger`
 
 ---
 
@@ -219,9 +213,9 @@ Swagger UI: `http://localhost:5000/swagger`
 
 ## 📌 Roadmap
 
-- [x] Next.js multi-page portal
+- [x] Next.js multi-page portal (12 pages)
 - [x] ASP.NET Core 8 REST API
-- [x] SQL Server database with EF Core migrations
+- [x] SQL Server with EF Core migrations
 - [x] CR lifecycle management
 - [x] Commercial costing module
 - [x] Approval workflow
@@ -231,7 +225,7 @@ Swagger UI: `http://localhost:5000/swagger`
 - [ ] Microsoft Entra ID authentication
 - [ ] SharePoint document integration
 - [ ] DocuSign API integration
-- [ ] Live API data connection (frontend)
+- [ ] Live API data connection
 
 ---
 
