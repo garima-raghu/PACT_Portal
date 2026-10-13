@@ -1,0 +1,9 @@
+node_modules/
+.next/
+api/bin/
+api/obj/
+api-published/
+*.env.local
+appsettings.json
+*.mdf
+*.ldf
